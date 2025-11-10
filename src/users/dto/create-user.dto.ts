@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsEmail,
   IsEnum,
   IsOptional,
@@ -32,9 +33,9 @@ export class CreateUserDto {
   })
   password: string;
 
-  @IsEnum(UserRoles)
+  @IsEnum(UserRoles, { each: true })
   roles: UserRoles[];
 
   @IsEnum(UserFrom)
-  form: UserFrom;
+  from: UserFrom;
 }
