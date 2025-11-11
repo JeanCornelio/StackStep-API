@@ -49,6 +49,8 @@ export class UsersService {
       throw new BadRequestException(error.detail);
     }
 
-    throw new BadRequestException(error);
+    throw new InternalServerErrorException(
+      'Unexpected error, check Server logs',
+    );
   }
 }

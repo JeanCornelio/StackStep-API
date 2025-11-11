@@ -1,9 +1,20 @@
-import { IsArray, IsDate, IsNumber, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { Category } from 'src/categories/entities/category.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export class CreateGoalDto {
   @IsUUID()
-  userId: string;
+  user: User;
 
   @IsString()
   title: string;
@@ -17,12 +28,16 @@ export class CreateGoalDto {
   @IsNumber()
   currentHours: number;
 
-  @IsNumber()
-  percet: number;
+  @IsString()
+  @IsOptional()
+  percent: string;
 
   @IsDate()
+  @Type(() => Date) //Transform the type of data
   deadLine: Date;
 
   @IsString()
+  @MaxLength(150)
+  @MinLength(10)
   description: string;
 }
