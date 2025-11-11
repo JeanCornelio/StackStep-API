@@ -44,10 +44,10 @@ export class User {
   from: UserFrom;
 
   @CreateDateColumn()
-  createDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updateDate: Date;
+  updatedAt: Date;
 
   @BeforeInsert()
   async hashPassword() {

@@ -1,12 +1,12 @@
 import { Category } from 'src/categories/entities/category.entity';
+import { GoalState } from 'src/enums/goal';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToOne,
-  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -17,13 +17,12 @@ export class Goal {
   id: string;
 
   @ManyToOne(() => User, (user) => user.id)
-  userId: User;
+  user: User;
 
   @Column('text')
   title: string;
 
-  @OneToMany(() => Category, (category) => category.uid)
-  @JoinTable()
+  @OneToOne(() => Category, (category) => category.goal)
   category: Category[];
 
   @Column('int')
@@ -32,18 +31,25 @@ export class Goal {
   @Column('int')
   currentHours: number;
 
-  @Column('numeric', { precision: 5, scale: 2 })
-  percet: number;
+  @Column('text', { default: '0.00' })
+  percent: string;
 
-  @Column('date')
+  @Column('timestamp')
   deadLine: Date;
 
   @Column('text')
   description: string;
 
+  @Column({
+    type: 'enum',
+    enum: GoalState,
+    default: GoalState.ACTIVE,
+  })
+  state: GoalState;
+
   @CreateDateColumn()
-  createDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updateDate: Date;
+  updatedAt: Date;
 }

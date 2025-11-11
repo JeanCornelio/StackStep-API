@@ -1,7 +1,9 @@
+import { Goal } from 'src/goals/entities/goal.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -11,6 +13,9 @@ export class Category {
   @PrimaryGeneratedColumn('uuid')
   uid: string;
 
+  @OneToOne(() => Goal, (goal) => goal.category)
+  goal: Goal;
+
   @Column('text')
   name: string;
 
@@ -18,8 +23,8 @@ export class Category {
   description: string;
 
   @CreateDateColumn()
-  createDate: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updateDate: Date;
+  updatedAt: Date;
 }
