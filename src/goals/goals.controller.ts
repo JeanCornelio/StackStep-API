@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
@@ -28,7 +29,7 @@ export class GoalsController {
   }
 
   @Get(':uuid')
-  findOne(@Param('uuid') uuid: string) {
+  findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.goalsService.findOne(uuid);
   }
 

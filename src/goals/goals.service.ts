@@ -81,6 +81,8 @@ export class GoalsService {
       .where(`goal.id = :id`, { id: uuid }) //get by id
       .getOne();
 
+    //TODO: Validate if goal exists
+
     return goal;
   }
 
