@@ -23,7 +23,7 @@ export class CreateGoalDto {
   category: Category[];
 
   @IsNumber()
-  targetHour: number;
+  totalHours: number;
 
   @IsNumber()
   currentHours: number;
@@ -34,7 +34,7 @@ export class CreateGoalDto {
 
   @IsDate()
   @Type(() => Date) //Transform the type of data
-  deadLine: Date;
+  dueDate: Date;
 
   @IsString()
   @MaxLength(150)
