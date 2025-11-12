@@ -11,7 +11,6 @@ import {
 import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
-import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { GetGoalDto } from './dto/get-goal.dto';
 
 @Controller('goals')
@@ -25,7 +24,6 @@ export class GoalsController {
 
   @Get()
   findAll(@Query() getGoalDto: GetGoalDto) {
-    //TODO: Create filter
     return this.goalsService.findAll(getGoalDto);
   }
 
@@ -34,9 +32,9 @@ export class GoalsController {
     return this.goalsService.findOne(uuid);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGoalDto: UpdateGoalDto) {
-    return this.goalsService.update(+id, updateGoalDto);
+  @Patch(':uuid')
+  update(@Param('uuid') uuid: string, @Body() updateGoalDto: UpdateGoalDto) {
+    return this.goalsService.update(uuid, updateGoalDto);
   }
 
   @Delete(':id')

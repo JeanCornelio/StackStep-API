@@ -35,15 +35,20 @@ export class GoalsService {
   }
 
   async findAll(getGoalDto: GetGoalDto) {
-    const { size = 10, page = 1, term } = getGoalDto;
+    const { size = 10, page = 1, term, category } = getGoalDto;
 
-    const userlogedUUID = '9c436e12-def3-4112-b559-35ca760af48e'; //Get user from TOKEN
+    const userlogedUUID = '8cd4be04-9d70-4669-a815-96af5c802e18'; //Get user from TOKEN
 
     const query = this.goalsRepository
       .createQueryBuilder('goal')
       .leftJoin('goal.user', 'user') //Relation in goal and users
       .select(['goal', 'user.id']) //select all of goal and only id of user
       .where('user.id = :id', { id: userlogedUUID }); //Search by user
+
+    //TODO: Test the Category filter
+    if (category) {
+      query.andWhere('goal.category = :category', { category }); //filter by category
+    }
 
     if (term) {
       query.andWhere(
@@ -79,8 +84,8 @@ export class GoalsService {
     return goal;
   }
 
-  update(id: number, updateGoalDto: UpdateGoalDto) {
-    return `This action updates a #${id} goal`;
+  update(id: string, updateGoalDto: UpdateGoalDto) {
+    console.log({ id, updateGoalDto });
   }
 
   remove(id: number) {

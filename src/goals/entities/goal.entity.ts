@@ -26,7 +26,7 @@ export class Goal {
   category: Category[];
 
   @Column('int')
-  targetHour: number;
+  totalHours: number;
 
   @Column('int')
   currentHours: number;
@@ -35,7 +35,7 @@ export class Goal {
   percent: string;
 
   @Column('timestamp')
-  deadLine: Date;
+  dueDate: Date;
 
   @Column('text')
   description: string;

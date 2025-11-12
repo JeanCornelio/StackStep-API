@@ -5,4 +5,8 @@ export class GetGoalDto extends PaginationDto {
   @IsString()
   @IsOptional()
   term: string;
+
+  @IsString()
+  @IsOptional()
+  category: string;
 }
