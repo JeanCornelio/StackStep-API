@@ -2,6 +2,7 @@ import { Goal } from 'src/goals/entities/goal.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -11,7 +12,7 @@ import {
 @Entity('categories')
 export class Category {
   @PrimaryGeneratedColumn('uuid')
-  uid: string;
+  id: string;
 
   @OneToOne(() => Goal, (goal) => goal.category)
   goal: Goal;
@@ -22,9 +23,15 @@ export class Category {
   @Column('text')
   description: string;
 
+  @Column('bool', { default: true })
+  isActive: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
