@@ -58,4 +58,9 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 #postgres
 
+<<<<<<< HEAD
 /postgres
+=======
+/postgres
+
+>>>>>>> c27846c12129b98283c46c71a38f3780911e82e6
