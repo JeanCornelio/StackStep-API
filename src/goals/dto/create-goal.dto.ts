@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsDate,
   IsNumber,
   IsOptional,
@@ -10,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Category } from 'src/categories/entities/category.entity';
+
 import { User } from 'src/users/entities/user.entity';
 
 export class CreateGoalDto {
@@ -19,8 +19,8 @@ export class CreateGoalDto {
   @IsString()
   title: string;
 
-  @IsArray()
-  category: Category[];
+  @IsUUID()
+  category: Category;
 
   @IsNumber()
   totalHours: number;

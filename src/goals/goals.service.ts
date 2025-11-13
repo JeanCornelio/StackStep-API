@@ -9,8 +9,9 @@ import { UpdateGoalDto } from './dto/update-goal.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Goal } from './entities/goal.entity';
 import { Repository } from 'typeorm';
-import { PaginationDto } from 'src/common/dtos/pagination.dto';
+
 import { GetGoalDto } from './dto/get-goal.dto';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Injectable()
 export class GoalsService {
@@ -19,11 +20,17 @@ export class GoalsService {
   constructor(
     @InjectRepository(Goal)
     private readonly goalsRepository: Repository<Goal>,
+
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   async create(createGoalDto: CreateGoalDto) {
     try {
-      const goal = this.goalsRepository.create(createGoalDto);
+      const goal = this.goalsRepository.create({
+        ...createGoalDto,
+        category: createGoalDto.category,
+      });
       await this.goalsRepository.save(goal);
 
       return {
@@ -42,7 +49,8 @@ export class GoalsService {
     const query = this.goalsRepository
       .createQueryBuilder('goal')
       .leftJoin('goal.user', 'user') //Relation in goal and users
-      .select(['goal', 'user.id']) //select all of goal and only id of user
+      .leftJoin('goal.category', 'category') //Relation in goal and category
+      .select(['goal', 'user.id', 'category.id', 'category.name'])
       .where('user.id = :id', { id: userlogedUUID }); //Search by user
 
     //TODO: Test the Category filter

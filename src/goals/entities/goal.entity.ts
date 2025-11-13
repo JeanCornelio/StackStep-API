@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -22,8 +21,8 @@ export class Goal {
   @Column('text')
   title: string;
 
-  @OneToOne(() => Category, (category) => category.goal)
-  category: Category[];
+  @ManyToOne(() => Category, (category) => category.goal)
+  category: Category;
 
   @Column('int')
   totalHours: number;
