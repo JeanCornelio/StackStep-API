@@ -5,10 +5,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Goal } from 'src/goals/entities/goal.entity';
 
 @Entity('users')
 export class User {
@@ -42,6 +44,9 @@ export class User {
     default: UserFrom.DEFAULT,
   })
   from: UserFrom;
+
+  @ManyToOne(() => Goal, (goal) => goal.user)
+  goal: Goal[];
 
   @CreateDateColumn()
   createdAt: Date;
