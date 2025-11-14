@@ -1,26 +1,19 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Goal } from './entities/goal.entity';
 import { Repository } from 'typeorm';
-
 import { GetGoalDto } from './dto/get-goal.dto';
 import { Category } from 'src/categories/entities/category.entity';
+import { HandleErrorService } from 'src/common/services/handleError.service';
 
 @Injectable()
 export class GoalsService {
-  private readonly logger = new Logger('GoalService');
-
   constructor(
     @InjectRepository(Goal)
     private readonly goalsRepository: Repository<Goal>,
-
+    private readonly handleErrorService: HandleErrorService,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
   ) {}
@@ -36,13 +29,13 @@ export class GoalsService {
       return {
         goal,
       };
-    } catch (error: unknown) {
-      this.handleError(error);
+    } catch (error) {
+      this.handleErrorService.error(error);
     }
   }
 
   async findAll(getGoalDto: GetGoalDto) {
-    const { size = 10, page = 1, term, category } = getGoalDto;
+    const { size = 10, page = 1, term, categoryId } = getGoalDto;
 
     const userlogedUUID = '8cd4be04-9d70-4669-a815-96af5c802e18'; //Get user from TOKEN
 
@@ -53,10 +46,9 @@ export class GoalsService {
       .select(['goal', 'user.id', 'category.id', 'category.name'])
       .where('user.id = :id', { id: userlogedUUID }); //Search by user
 
-    //TODO: Fix the category filter
-    if (category) {
-      query.andWhere('goal.category_id = :category_id', {
-        category_id: category,
+    if (categoryId) {
+      query.andWhere('goal.category = :category', {
+        category: categoryId,
       }); //filter by category
     }
 
@@ -117,6 +109,8 @@ export class GoalsService {
       category: category,
     });
 
+    await this.goalsRepository.save(goal as Goal);
+
     return goal;
   }
 
@@ -127,26 +121,5 @@ export class GoalsService {
     return {
       message: 'Goal deleted successfully',
     };
-  }
-
-  //TODO: Create a reutilizable function or class
-  //TODO: Add type
-  //TODO: Add categoryid error
-  handleError(error) {
-    console.log(error);
-
-    if (error.code === '23505') {
-      throw new BadRequestException(error.detail);
-    }
-
-    if (error.code === '23503') {
-      throw new BadRequestException('Error related to foreign key constraint.');
-    }
-
-    this.logger.error(error);
-
-    throw new InternalServerErrorException(
-      'Unexpected error, check Server logs',
-    );
   }
 }
