@@ -38,8 +38,8 @@ export class GoalsController {
     return this.goalsService.update(uuid, updateGoalDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.goalsService.remove(+id);
+  @Delete(':uuid')
+  remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
+    return this.goalsService.remove(uuid);
   }
 }

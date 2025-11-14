@@ -54,7 +54,6 @@ export class CategoriesService {
     if (!category) {
       throw new BadRequestException(`Category is not found`);
     }
-    await this.categoriesRepository.save(category);
 
     return category;
   }

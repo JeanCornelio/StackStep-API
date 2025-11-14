@@ -8,7 +8,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Category } from 'src/categories/entities/category.entity';
 
 import { User } from 'src/users/entities/user.entity';
 
@@ -20,7 +19,7 @@ export class CreateGoalDto {
   title: string;
 
   @IsUUID()
-  category: Category;
+  categoryId: string;
 
   @IsNumber()
   totalHours: number;
