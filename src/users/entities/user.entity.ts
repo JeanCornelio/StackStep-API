@@ -23,11 +23,11 @@ export class User {
   @Column('text', { nullable: true })
   avatar: string;
 
+  //TODO: Create a way to normalize email and username when user is updating
   @Column('text', { unique: true })
   email: string;
 
-  @Column('text')
-  @Exclude()
+  @Column('text', { nullable: true, select: false })
   password: string;
 
   @Column({
@@ -36,7 +36,7 @@ export class User {
     enum: UserRoles,
     default: [UserRoles.USER],
   })
-  roles: UserRoles[];
+  roles: string[];
 
   @Column({
     type: 'enum',

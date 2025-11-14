@@ -32,7 +32,7 @@ export class CategoriesService {
       return this.categoriesRepository.save(newCategory);
     } catch (error) {
       //TODO: improve error handling
-      throw new Error('Error creating category: ' + error.message);
+      throw new Error(error.message);
     }
   }
 
