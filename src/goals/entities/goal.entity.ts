@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -16,12 +17,14 @@ export class Goal {
   id: string;
 
   @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'user_Id' })
   user: User;
 
   @Column('text')
   title: string;
 
-  @ManyToOne(() => Category, (category) => category.goal)
+  @ManyToOne(() => Category)
+  @JoinColumn({ name: 'category_Id' })
   category: Category;
 
   @Column('int')

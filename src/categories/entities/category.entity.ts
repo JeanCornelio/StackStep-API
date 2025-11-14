@@ -1,11 +1,11 @@
-import { Goal } from 'src/goals/entities/goal.entity';
+//import { Goal } from 'src/goals/entities/goal.entity';
 
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
+  //OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -15,8 +15,8 @@ export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToMany(() => Goal, (goal) => goal.category)
-  goal: Goal[];
+  // @OneToMany(() => Goal, (goal) => goal.category)
+  // goal: Goal;
 
   @Column('text')
   name: string;

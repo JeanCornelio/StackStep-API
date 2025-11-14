@@ -29,7 +29,7 @@ export class GoalsService {
     try {
       const goal = this.goalsRepository.create({
         ...createGoalDto,
-        category: createGoalDto.category,
+        category: { id: createGoalDto.categoryId },
       });
       await this.goalsRepository.save(goal);
 
@@ -53,9 +53,11 @@ export class GoalsService {
       .select(['goal', 'user.id', 'category.id', 'category.name'])
       .where('user.id = :id', { id: userlogedUUID }); //Search by user
 
-    //TODO: Test the Category filter
+    //TODO: Fix the category filter
     if (category) {
-      query.andWhere('goal.category = :category', { category }); //filter by category
+      query.andWhere('goal.category_id = :category_id', {
+        category_id: category,
+      }); //filter by category
     }
 
     if (term) {
@@ -82,35 +84,63 @@ export class GoalsService {
   }
 
   async findOne(uuid: string) {
-    const goal = await this.goalsRepository
-      .createQueryBuilder('goal')
-      .leftJoin('goal.user', 'user')
-      .select(['goal', 'user.id'])
-      .where(`goal.id = :id`, { id: uuid }) //get by id
-      .getOne();
+    const goal = await this.goalsRepository.findOne({
+      where: { id: uuid },
+      relations: { user: true, category: true },
+      select: {
+        user: { id: true },
+        category: { id: true, name: true },
+      },
+    });
 
-    //TODO: Validate if goal exists
+    if (!goal) {
+      throw new BadRequestException(`Goal not found`);
+    }
 
     return goal;
   }
 
-  update(id: string, updateGoalDto: UpdateGoalDto) {
-    console.log({ id, updateGoalDto });
+  async update(uuid: string, updateGoalDto: UpdateGoalDto) {
+    await this.findOne(uuid);
+
+    const category = await this.categoryRepository.findOneBy({
+      id: updateGoalDto.categoryId,
+    });
+
+    if (!category) {
+      throw new BadRequestException(`Category not found`);
+    }
+
+    const goal = await this.goalsRepository.preload({
+      id: uuid,
+      ...updateGoalDto,
+      category: category,
+    });
+
+    return goal;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} goal`;
+  async remove(uuid: string) {
+    await this.findOne(uuid);
+
+    await this.goalsRepository.delete({ id: uuid });
+    return {
+      message: 'Goal deleted successfully',
+    };
   }
 
   //TODO: Create a reutilizable function or class
   //TODO: Add type
+  //TODO: Add categoryid error
   handleError(error) {
+    console.log(error);
+
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }
 
     if (error.code === '23503') {
-      throw new BadRequestException('The user is not found.');
+      throw new BadRequestException('Error related to foreign key constraint.');
     }
 
     this.logger.error(error);
