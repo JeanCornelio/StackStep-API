@@ -13,7 +13,10 @@ import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
 import { GetGoalDto } from './dto/get-goal.dto';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { UserRoles } from 'src/enums/user';
 
+@Auth(UserRoles.USER, UserRoles.ADMIN)
 @Controller('goals')
 export class GoalsController {
   constructor(private readonly goalsService: GoalsService) {}
