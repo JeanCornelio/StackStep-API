@@ -30,7 +30,7 @@ export class Goal {
   @Column('int')
   totalHours: number;
 
-  @Column('int')
+  @Column('int', { default: 0, nullable: true })
   currentHours: number;
 
   @Column('text', { default: '0.00' })
