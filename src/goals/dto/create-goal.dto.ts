@@ -9,11 +9,11 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { User } from 'src/users/entities/user.entity';
+//import { User } from 'src/users/entities/user.entity';
 
 export class CreateGoalDto {
-  @IsUUID()
-  user: User;
+  // @IsUUID()
+  // user: User;
 
   @IsString()
   title: string;
@@ -24,8 +24,8 @@ export class CreateGoalDto {
   @IsNumber()
   totalHours: number;
 
-  @IsNumber()
-  currentHours: number;
+  // @IsNumber()
+  // currentHours: number;
 
   @IsString()
   @IsOptional()

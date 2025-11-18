@@ -18,10 +18,13 @@ export class GoalsService {
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  async create(createGoalDto: CreateGoalDto) {
+  async create(createGoalDto: CreateGoalDto, userId: string) {
     try {
+      console.log(createGoalDto);
+
       const goal = this.goalsRepository.create({
         ...createGoalDto,
+        user: { id: userId },
         category: { id: createGoalDto.categoryId },
       });
       await this.goalsRepository.save(goal);

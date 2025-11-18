@@ -30,6 +30,11 @@ export class CategoriesController {
     return this.categoriesService.findAll(paginationDto);
   }
 
+  @Get('dropdown')
+  findAllDropdown() {
+    return this.categoriesService.findAllDropdown();
+  }
+
   @Patch(':uuid')
   update(
     @Param('uuid', ParseUUIDPipe) uuid: string,

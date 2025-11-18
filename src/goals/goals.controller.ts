@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
+  Req,
 } from '@nestjs/common';
 import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
@@ -15,6 +16,7 @@ import { UpdateGoalDto } from './dto/update-goal.dto';
 import { GetGoalDto } from './dto/get-goal.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { UserRoles } from 'src/enums/user';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
 
 @Auth(UserRoles.USER)
 @Controller('goals')
@@ -22,8 +24,12 @@ export class GoalsController {
   constructor(private readonly goalsService: GoalsService) {}
 
   @Post()
-  create(@Body() createGoalDto: CreateGoalDto) {
-    return this.goalsService.create(createGoalDto);
+  create(
+    @Body() createGoalDto: CreateGoalDto,
+    @GetUser('id') user: { id: string },
+  ) {
+    const userID = user.id;
+    return this.goalsService.create(createGoalDto, userID);
   }
 
   @Get()

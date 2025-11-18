@@ -43,7 +43,22 @@ export class CategoriesService {
       skip: (page - 1) * size,
     });
 
-    return categories;
+    return {
+      data: categories,
+      page,
+      size,
+    };
+  }
+
+  async findAllDropdown() {
+    const categories = await this.categoriesRepository.find({
+      select: { id: true, name: true },
+      where: { isActive: true },
+    });
+
+    return {
+      data: categories,
+    };
   }
 
   async update(uuid: string, updateCategoryDto: UpdateCategoryDto) {
