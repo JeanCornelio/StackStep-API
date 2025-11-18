@@ -35,9 +35,9 @@ export class GoalsService {
   }
 
   async findAll(getGoalDto: GetGoalDto) {
-    const { size = 10, page = 1, term, categoryId } = getGoalDto;
+    const { size = 8, page = 1, term, categoryId } = getGoalDto;
 
-    const userlogedUUID = '8cd4be04-9d70-4669-a815-96af5c802e18'; //Get user from TOKEN
+    const userlogedUUID = '278f659f-da90-42f0-8ca8-b09f5377953e'; //Get user from TOKEN
 
     const query = this.goalsRepository
       .createQueryBuilder('goal')
