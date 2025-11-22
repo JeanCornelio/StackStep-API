@@ -6,6 +6,8 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { type Response } from 'express';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,22 +16,11 @@ export class AuthService {
   ) {}
 
   async create(createUser: CreateUserDto) {
-    const res = await this.userService.create(createUser);
-    return res;
+    const user = await this.userService.create(createUser);
+    return user;
   }
 
-  async validateUser(email: string, password: string) {
-    const user = await this.userService.findOneById({
-      where: { email },
-    });
-    if (user && user.password === password) {
-      console.log(user);
-    }
-
-    return null;
-  }
-
-  async login(loginAuthDto: LoginAuthDto) {
+  async login(loginAuthDto: LoginAuthDto, res: Response) {
     const { email, password } = loginAuthDto;
 
     const user = await this.userService.findOneById({
@@ -49,17 +40,71 @@ export class AuthService {
     };
 
     if (checkPassword) {
+      const refreshToken = this.getJwtToken(payload);
+      //TODO: generar el refresh token
+
+      res.cookie('refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
       return {
-        ...payload,
-        access_token: this.getJwtToken(payload),
+        data: { ...payload, access_token: this.getJwtToken(payload) },
       };
+    } else {
+      throw new BadRequestException('Invalid credentials');
     }
   }
 
-  private getJwtToken(payload: JwtPayload) {
-    //Firmar el JWT
-    const token = this.jwtService.sign(payload);
+  refreshToken(token: string) {
+    const { id, roles } = this.verifyToken(token);
 
+    const newToken = this.getJwtToken({ id, roles });
+
+    return {
+      data: { access_token: newToken },
+    };
+  }
+
+  private isTokenValid(token: string) {
+    try {
+      const payload = this.jwtService.verify<JwtPayload>(token);
+
+      return payload;
+    } catch {
+      return false;
+    }
+  }
+
+  verifyToken(token: string): JwtPayload {
+    try {
+      const payload = this.isTokenValid(token);
+
+      if (!payload) {
+        throw new BadRequestException('Invalid token');
+      }
+
+      return payload;
+    } catch {
+      throw new BadRequestException('Invalid token');
+    }
+  }
+
+  logOut(res: Response) {
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+
+    return { data: { message: 'Logged out successfully' } };
+  }
+
+  private getJwtToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
     return token;
   }
 }

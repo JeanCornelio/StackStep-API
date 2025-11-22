@@ -8,7 +8,6 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
-  Req,
 } from '@nestjs/common';
 import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
