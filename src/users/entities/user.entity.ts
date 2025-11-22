@@ -21,7 +21,7 @@ export class User {
   username: string;
 
   @Column('text', { nullable: true })
-  avatar: string;
+  avatarUrl: string;
 
   //TODO: Create a way to normalize email and username when user is updating
   @Column('text', { unique: true })
