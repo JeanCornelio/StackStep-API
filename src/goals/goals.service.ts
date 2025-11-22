@@ -49,12 +49,6 @@ export class GoalsService {
       .select(['goal', 'user.id', 'category.id', 'category.name'])
       .where('user.id = :id', { id: userlogedUUID }); //Search by user
 
-    if (categoryId) {
-      query.andWhere('goal.category = :category', {
-        category: categoryId,
-      }); //filter by category
-    }
-
     if (term) {
       query.andWhere(
         'goal.title ILIKE :title or goal.description ILIKE :description', //  search by Term
@@ -63,6 +57,12 @@ export class GoalsService {
           description: `%${term}%`,
         },
       );
+    }
+
+    if (categoryId) {
+      query.andWhere('goal.category = :category', {
+        category: categoryId,
+      }); //filter by category
     }
 
     query
