@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, Res, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -28,6 +28,11 @@ export class AuthController {
   @Get('profile')
   getProfile(@GetUser() user: CreateAuthDto) {
     return { data: { user } };
+  }
+
+  @Get('active-account/:token')
+  activeAccount(@Param('token') token: string) {
+    return this.authService.activeAccount(token);
   }
 
   @Post('refresh')

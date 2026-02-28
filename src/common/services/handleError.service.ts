@@ -13,10 +13,19 @@ export class HandleErrorService {
   }
 
   error(error: { code?: string; detail?: string }) {
-    console.log(error);
-
     if (error.code === '23505') {
-      throw new BadRequestException(error.detail);
+      const detail: string | undefined = error.detail;
+
+      if (!detail) return null;
+
+      // detail typical format:
+      // Key (email)=(example@gmail.com) already exists.
+      const match = detail.match(/\((.*?)\)=/);
+
+      const field = match ? match[1] : null; // returns "email", "username", etc.
+      throw new BadRequestException(
+        `${field ? field : 'Field'} already exists`,
+      );
     }
 
     if (error.code === '23503') {

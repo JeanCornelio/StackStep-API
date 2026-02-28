@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { HandleErrorService } from 'src/common/services/handleError.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +18,13 @@ export class UsersService {
     try {
       const user = this.userRepository.create(createUserDto);
       await this.userRepository.save(user);
-      return user;
+
+      const newUser = await this.userRepository.findOne({
+        where: { id: user.id },
+        select: ['id', 'email', 'roles', 'state', 'from', 'createdAt'],
+      });
+
+      return newUser;
     } catch (error) {
       this.handleErrorService.error(error);
     }
@@ -27,5 +34,18 @@ export class UsersService {
     return await this.userRepository.findOne({
       ...options,
     });
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      await this.userRepository.update(id, updateUserDto);
+
+      return await this.userRepository.findOne({
+        where: { id },
+        select: ['id', 'email', 'roles', 'state', 'from', 'createdAt'],
+      });
+    } catch (error) {
+      this.handleErrorService.error(error);
+    }
   }
 }

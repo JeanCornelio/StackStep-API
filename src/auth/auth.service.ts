@@ -1,23 +1,61 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { type Response } from 'express';
+import { UserState } from 'src/enums/user';
+import { EmailService } from 'src/common/services/email.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createUser: CreateUserDto) {
     const user = await this.userService.create(createUser);
-    return user;
+
+    if (!user || !user.email) {
+      throw new BadRequestException('User could not be created');
+    }
+
+    await this.sendActivationEmail(user);
+
+    return {
+      data: { user },
+    };
+  }
+
+  async sendActivationEmail(user: User) {
+    //TODO: generate activation token and send email with activation link
+    const { id, roles } = user;
+
+    const token = this.getJwtToken({ id, roles }, { expiresIn: '15m' });
+
+    const res = await this.emailService.sendMail({
+      from: 'StackStep - <stackStep@noreplay.com>',
+      to: user.email,
+      subject: 'Welcome to StackStep!',
+      text: 'Thank you for registering at StackStep. Please activate your account by clicking the link sent to your email.',
+      html: `<p>Thank you for registering at StackStep. Please activate your account by clicking the link sent to your email.</p>
+      
+            <a href="http://localhost:5173/verify-account/${token}">Activate Account</a>
+             `,
+    });
+
+    console.log(res);
   }
 
   async login(loginAuthDto: LoginAuthDto, res: Response) {
@@ -25,11 +63,21 @@ export class AuthService {
 
     const user = await this.userService.findOneById({
       where: { email: email },
-      select: ['id', 'password', 'roles'],
+      select: ['id', 'password', 'roles', 'state'],
     });
 
     if (!user) {
       throw new BadRequestException('Invalid credentials');
+    }
+
+    if (user?.state === UserState.PENDING_ACTIVATION) {
+      throw new UnauthorizedException(
+        'The account is not activated yet, please check your email to activate it',
+      );
+    }
+
+    if (user?.state === UserState.DISABLED) {
+      throw new UnauthorizedException('The account has been disabled');
     }
 
     const checkPassword = await bcrypt.compare(password, user?.password);
@@ -41,7 +89,6 @@ export class AuthService {
 
     if (checkPassword) {
       const refreshToken = this.getJwtToken(payload);
-      //TODO: generar el refresh token
 
       res.cookie('refresh_token', refreshToken, {
         httpOnly: true,
@@ -79,15 +126,46 @@ export class AuthService {
     }
   }
 
+  async activeAccount(token: string) {
+    const { id } = this.verifyToken(token);
+
+    const user = await this.userService.findOneById({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.state === UserState.ACTIVE) {
+      throw new ConflictException('The account is already activated');
+    }
+
+    await this.userService.update(id, { state: UserState.ACTIVE });
+
+    return {
+      data: { message: 'Account activated successfully' },
+    };
+    //Steps  to activate account
+
+    /* 
+    1- Verify token (Check)
+    2- verify isn't expired (Check)
+    3- Vefify if the user exist
+    4- user if the user is not active
+    5- change state of user 
+   */
+  }
+
   verifyToken(token: string): JwtPayload {
     try {
-      const payload = this.isTokenValid(token);
+      const tokenValidated = this.isTokenValid(token);
 
-      if (!payload) {
+      if (!tokenValidated) {
         throw new BadRequestException('Invalid token');
       }
 
-      return payload;
+      return tokenValidated;
     } catch {
       throw new BadRequestException('Invalid token');
     }
@@ -103,8 +181,8 @@ export class AuthService {
     return { data: { message: 'Logged out successfully' } };
   }
 
-  private getJwtToken(payload: JwtPayload) {
-    const token = this.jwtService.sign(payload);
+  private getJwtToken(payload: JwtPayload, options?: JwtSignOptions) {
+    const token = this.jwtService.sign(payload, options ?? {});
     return token;
   }
 }
