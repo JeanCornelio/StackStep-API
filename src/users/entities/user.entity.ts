@@ -1,11 +1,11 @@
-import { UserFrom, UserRoles } from 'src/enums/user';
+import { UserFrom, UserRoles, UserState } from 'src/enums/user';
 import * as bcrypt from 'bcrypt';
 import {
   BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -40,13 +40,19 @@ export class User {
 
   @Column({
     type: 'enum',
+    enum: UserState,
+    default: UserState.PENDING_ACTIVATION,
+  })
+  state: UserState;
+  @Column({
+    type: 'enum',
     enum: UserFrom,
     default: UserFrom.DEFAULT,
   })
   from: UserFrom;
 
-  @ManyToOne(() => Goal, (goal) => goal.user)
-  goal: Goal[];
+  @OneToMany(() => Goal, (goals) => goals.user)
+  goals: Goal[];
 
   @CreateDateColumn()
   createdAt: Date;
@@ -59,5 +65,15 @@ export class User {
     const saltRounds = 12;
     const passwordhashed = await bcrypt.hash(this.password, saltRounds);
     this.password = passwordhashed;
+  }
+
+  @BeforeInsert()
+  normalizeEmail() {
+    this.email = this.email.toLowerCase().trim();
+  }
+
+  @BeforeInsert()
+  normalizeUsername() {
+    this.username = this.username.toLowerCase().trim();
   }
 }

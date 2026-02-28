@@ -37,21 +37,21 @@ export class GoalsService {
     }
   }
 
-  async findAll(getGoalDto: GetGoalDto) {
+  async findAll(getGoalDto: GetGoalDto, userId: string) {
     const { size = 8, page = 1, term, categoryId } = getGoalDto;
 
-    const userlogedUUID = '278f659f-da90-42f0-8ca8-b09f5377953e'; //Get user from TOKEN
+    const userlogedUUID = userId; //Get user from TOKEN
 
     const query = this.goalsRepository
-      .createQueryBuilder('goal')
-      .leftJoin('goal.user', 'user') //Relation in goal and users
-      .leftJoin('goal.category', 'category') //Relation in goal and category
-      .select(['goal', 'user.id', 'category.id', 'category.name'])
+      .createQueryBuilder('goals')
+      .leftJoin('goals.user', 'user') //Relation in goal and users
+      .leftJoin('goals.category', 'category') //Relation in goal and category
+      .select(['goals', 'user.id', 'category.id', 'category.name'])
       .where('user.id = :id', { id: userlogedUUID }); //Search by user
 
     if (term) {
       query.andWhere(
-        'goal.title ILIKE :title or goal.description ILIKE :description', //  search by Term
+        'goals.title ILIKE :title or goals.description ILIKE :description', //  search by Term
         {
           title: `%${term}%`,
           description: `%${term}%`,
@@ -60,13 +60,13 @@ export class GoalsService {
     }
 
     if (categoryId) {
-      query.andWhere('goal.category = :category', {
+      query.andWhere('goals.category = :category', {
         category: categoryId,
       }); //filter by category
     }
 
     query
-      .orderBy('goal.createdAt', 'DESC')
+      .orderBy('goals.createdAt', 'DESC')
       .take(size)
       .skip((page - 1) * size);
 

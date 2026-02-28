@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CategoriesModule } from './categories/categories.module';
 import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -21,6 +22,15 @@ import { CommonModule } from './common/common.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true, //Only in dev
+    }),
+    MailerModule.forRoot({
+      transport: {
+        service: process.env.MAILER_SERVICE,
+        auth: {
+          user: process.env.MAILER_USER,
+          pass: process.env.MAILER_PASSWORD,
+        },
+      },
     }),
 
     GoalsModule,
