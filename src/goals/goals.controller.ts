@@ -16,6 +16,7 @@ import { GetGoalDto } from './dto/get-goal.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { UserRoles } from 'src/enums/user';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Auth(UserRoles.USER)
 @Controller('goals')
@@ -32,8 +33,8 @@ export class GoalsController {
   }
 
   @Get()
-  findAll(@Query() getGoalDto: GetGoalDto) {
-    return this.goalsService.findAll(getGoalDto);
+  findAll(@Query() getGoalDto: GetGoalDto, @GetUser() user: User) {
+    return this.goalsService.findAll(getGoalDto, user.id);
   }
 
   @Get(':uuid')

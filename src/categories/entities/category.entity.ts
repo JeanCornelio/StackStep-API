@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  //OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,9 +13,6 @@ import {
 export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  // @OneToMany(() => Goal, (goal) => goal.category)
-  // goal: Goal;
 
   @Column('text')
   name: string;

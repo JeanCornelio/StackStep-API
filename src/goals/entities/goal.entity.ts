@@ -16,7 +16,7 @@ export class Goal {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.goals)
   @JoinColumn({ name: 'user_Id' })
   user: User;
 

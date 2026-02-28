@@ -7,7 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UserFrom, UserRoles } from 'src/enums/user';
+import { UserFrom, UserRoles, UserState } from 'src/enums/user';
 
 export class CreateUserDto {
   @IsString()
@@ -32,9 +32,15 @@ export class CreateUserDto {
   })
   password: string;
 
+  @IsOptional()
   @IsEnum(UserRoles, { each: true })
   roles: UserRoles[];
 
+  @IsOptional()
   @IsEnum(UserFrom)
   from: UserFrom;
+
+  @IsOptional()
+  @IsEnum(UserState)
+  state: UserState;
 }
