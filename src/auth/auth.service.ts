@@ -146,15 +146,6 @@ export class AuthService {
     return {
       data: { message: 'Account activated successfully' },
     };
-    //Steps  to activate account
-
-    /* 
-    1- Verify token (Check)
-    2- verify isn't expired (Check)
-    3- Vefify if the user exist
-    4- user if the user is not active
-    5- change state of user 
-   */
   }
 
   verifyToken(token: string): JwtPayload {
