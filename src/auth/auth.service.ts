@@ -15,6 +15,7 @@ import { type Response } from 'express';
 import { UserState } from 'src/enums/user';
 import { EmailService } from 'src/common/services/email.service';
 import { User } from 'src/users/entities/user.entity';
+import { CreateGithubUserDto } from 'src/users/dto/create-github-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -44,18 +45,21 @@ export class AuthService {
 
     const token = this.getJwtToken({ id, roles }, { expiresIn: '15m' });
 
-    const res = await this.emailService.sendMail({
-      from: 'StackStep - <stackStep@noreplay.com>',
-      to: user.email,
-      subject: 'Welcome to StackStep!',
-      text: 'Thank you for registering at StackStep. Please activate your account by clicking the link sent to your email.',
-      html: `<p>Thank you for registering at StackStep. Please activate your account by clicking the link sent to your email.</p>
+    try {
+      await this.emailService.sendMail({
+        from: 'StackStep - <stackStep@noreplay.com>',
+        to: user.email,
+        subject: 'Welcome to StackStep!',
+        text: 'Thank you for registering at StackStep. Please activate your account by clicking the link sent to your email.',
+        html: `<p>Thank you for registering at StackStep. Please activate your account by clicking the link sent to your email.</p>
       
             <a href="http://localhost:5173/verify-account/${token}">Activate Account</a>
              `,
-    });
-
-    console.log(res);
+      });
+    } catch (error) {
+      //TODO: handle email sending error, maybe retry or log the error for later analysis
+      console.log(error);
+    }
   }
 
   async login(loginAuthDto: LoginAuthDto, res: Response) {
@@ -89,21 +93,23 @@ export class AuthService {
 
     if (checkPassword) {
       const refreshToken = this.getJwtToken(payload);
-
-      res.cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-
+      this.setCookies(res, refreshToken);
       return {
         data: { ...payload, access_token: this.getJwtToken(payload) },
       };
     } else {
       throw new BadRequestException('Invalid credentials');
     }
+  }
+
+  private setCookies(res: Response, refreshToken: string) {
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
   }
 
   refreshToken(token: string) {
@@ -175,5 +181,25 @@ export class AuthService {
   private getJwtToken(payload: JwtPayload, options?: JwtSignOptions) {
     const token = this.jwtService.sign(payload, options ?? {});
     return token;
+  }
+
+  async loginWithGithub(payload: CreateGithubUserDto, res: Response) {
+    try {
+      const user =
+        (await this.userService.findOneById({
+          where: { email: payload.email },
+        })) ?? (await this.userService.createOauthUser(payload));
+
+      const refreshToken = this.getJwtToken({
+        id: user?.id,
+        roles: user?.roles,
+      } as JwtPayload);
+      this.setCookies(res, refreshToken);
+
+      res.redirect(`http://localhost:5173/login/callback/${refreshToken}`);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Error getting OAuth token');
+    }
   }
 }

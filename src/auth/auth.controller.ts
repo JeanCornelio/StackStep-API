@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Req, Res, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Req,
+  Res,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -6,6 +15,8 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { Auth } from './decorators/auth.decorator';
 import { GetUser } from './decorators/get-user.decorator';
 import type { Request, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
+import { CreateGithubUserDto } from 'src/users/dto/create-github-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -40,6 +51,19 @@ export class AuthController {
     const token: string = request.cookies['refresh_token'] as string;
 
     return this.authService.refreshToken(token);
+  }
+
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  githubLogin() {}
+
+  @Get('login/github/callback')
+  @UseGuards(AuthGuard('github'))
+  githubCallback(
+    @GetUser() user: CreateGithubUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.loginWithGithub(user, res);
   }
 
   @Post('logout')

@@ -62,6 +62,8 @@ export class User {
 
   @BeforeInsert()
   async hashPassword() {
+    if (!this.password) return;
+
     const saltRounds = 12;
     const passwordhashed = await bcrypt.hash(this.password, saltRounds);
     this.password = passwordhashed;
