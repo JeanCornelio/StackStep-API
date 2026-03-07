@@ -66,14 +66,6 @@ export class AuthController {
     return this.authService.loginWithGithub(user, res);
   }
 
-  // @Post('oauth-token')
-  // getOauthToken(
-  //   @Body() code: GetOAuthTokenDto,
-  //   @Res({ passthrough: true }) res: Response,
-  // ) {
-  //   return this.authService.getJwtTokenByOAuthToken(code, res);
-  // }
-
   @Post('logout')
   logOut(@Res({ passthrough: true }) res: Response) {
     return this.authService.logOut(res);
